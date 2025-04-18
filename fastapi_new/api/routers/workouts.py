@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import Optional
 from fastapi import APIRouter,Depends,HTTPException,status
-from api.models import workout
+from api.models import Workout
 from api.deps import db_dependency,user_dependency
 
 router = APIRouter(
@@ -18,15 +18,15 @@ class WorkoutCreate(WorkoutBase):
 
 @router.get("/")
 def get_workout(db:db_dependency,user: user_dependency,workout_id:int):
-    return db.query(workout).filter(workout.id == workout_id).first()
+    return db.query(Workout).filter(Workout.id == workout_id).first()
 
 @router.get("/workouts")
 def get_workouts(db:db_dependency,user: user_dependency):
-    return db.query(workout).all()
+    return db.query(Workout).all()
 
 @router.post("/",status_code=status.HTTP_201_CREATED)
 def create_workout(db:db_dependency,user: user_dependency,workout_create:WorkoutCreate):
-    db_workout = workout(**workout_create.model_dump(),user_id=user.get("id"))
+    db_workout = Workout(**workout_create.model_dump(),user_id=user.get("id"))
     db.add(db_workout)
     db.commit()
     db.refresh
@@ -34,8 +34,8 @@ def create_workout(db:db_dependency,user: user_dependency,workout_create:Workout
 
 @router.delete("/")
 def delete_workout(db:db_dependency,user: user_dependency,workout_id:int):
-    db_workout = db.query(workout).filter(workout.id == workout_id).first()
+    db_workout = db.query(Workout).filter(Workout.id == workout_id).first()
     if db_workout:
-        db.delete(db.workout)
+        db.delete(db_workout)
         db.commit()
     return db_workout
