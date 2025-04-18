@@ -14,13 +14,20 @@ const Home = () => {
   const [routineName, setRoutineName] = useState('');
   const [routineDescription, setRoutineDescription] = useState('');
   const [selectedWorkouts, setSelectedWorkouts] = useState([]);
+  const [token, setToken] = useState('');
 
-  const token = localStorage.getItem('token');
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('token');
+      setToken(storedToken);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchWorkoutsAndRoutines = async () => {
+      if (!token) return;
+      
       try {
-        const token = localStorage.getItem('token'); 
         const [workoutsResponse, routinesResponse] = await Promise.all([
           axios.get('http://localhost:8000/workouts/workouts', {
             headers: { Authorization: `Bearer ${token}` },
@@ -34,11 +41,14 @@ const Home = () => {
         setRoutines(routinesResponse.data);
       } catch (error) {
         console.error('Failed to fetch data:', error);
+        if (error.response?.status === 401) {
+          logout();
+        }
       }
     };
 
     fetchWorkoutsAndRoutines();
-  }, []);
+  }, [token, logout]);
 
   const handleCreateWorkout = async (e) => {
     e.preventDefault();
@@ -46,12 +56,17 @@ const Home = () => {
       const response = await axios.post('http://localhost:8000/workouts', {
         name: workoutName,
         description: workoutDescription,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       setWorkouts([...workouts, response.data]);
       setWorkoutName('');
       setWorkoutDescription('');
     } catch (error) {
       console.error('Failed to create workout:', error);
+      if (error.response?.status === 401) {
+        logout();
+      }
     }
   };
 
@@ -62,12 +77,18 @@ const Home = () => {
         name: routineName,
         description: routineDescription,
         workouts: selectedWorkouts,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
+      setRoutines([...routines, response.data]);
       setRoutineName('');
       setRoutineDescription('');
       setSelectedWorkouts([]);
     } catch (error) {
       console.error('Failed to create routine:', error);
+      if (error.response?.status === 401) {
+        logout();
+      }
     }
   };
 
