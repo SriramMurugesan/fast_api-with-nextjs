@@ -24,4 +24,6 @@ app.add_middleware(
 def read_root():
     return "Hello World!"
 
+app.include_router(auth.router)
+
     

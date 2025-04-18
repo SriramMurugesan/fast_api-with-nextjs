@@ -2,13 +2,13 @@ from datetime import timedelta, datetime,timezone
 from fastapi import APIRouter,Depends,HTTPException,status
 from typing import Annotated
 from pydantic import BaseModel
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer,OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from dotenv import load_dotenv
 import os
 from api.models import User
-from api.deps import db_dependency, bcrypt_context
 from sqlalchemy.orm import Session
+from api.deps import db_dependency,bcrypt_context
 
 load_dotenv()
 
@@ -55,7 +55,7 @@ async def create_user(db:db_dependency, create_user_request:UserCreateRequest):
     return {"message": "User created successfully"}
 
 @router.post("/token",response_model=Token)
-async def login_for_access_token(form_data:Annotated[OAuth2PasswordBearer,Depends()],       db:db_dependency):
+async def login_for_access_token(form_data:Annotated[OAuth2PasswordRequestForm,Depends()],       db:db_dependency):
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(
