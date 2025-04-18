@@ -17,7 +17,7 @@ router = APIRouter(
     tags=["Auth"]
 )
 
-SECRET_KEY = os.getenv("AUTH_SECRET_KEY")
+SECRET_KEY = os.getenv("AUTH_SECRET")
 ALGORITHM = os.getenv("AUTH_ALGORITHM")
 
 
